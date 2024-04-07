@@ -252,20 +252,20 @@
                     <tr>
                         <td>12:00</td>
                         <td>DHT Sensor</td>
-                        <td>Inside</td>
+                        <td>Courtyard</td>
                         <td>34</td>
                     </tr>
                     <tr>
                         <td>1:00</td>
                         <td>Light sensor</td>
-                        <td>Outside</td>
+                        <td>Hostel room</td>
                         <td>58</td>
 
                     </tr>
                     <tr>
                         <td>2:00</td>
                         <td>Water sensor</td>
-                        <td>Outside</td>
+                        <td>Courtyard</td>
                         <td>110</td>
 
                     </tr>
