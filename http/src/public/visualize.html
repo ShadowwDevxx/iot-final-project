@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns"></script>
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+    />
+    <style>
+      body {
+        background-color: #f5f5f5;
+      }
+
+      .heading {
+        font-size: 1.5rem;
+        text-align: center;
+        color: #3b82f6;
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+      }
+      #myChart {
+        width: 90%; /* take up full width of its container */
+        height: 500px; /* set a specific height */
+        margin: 50px auto;
+        background-color: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+    </style>
+    <title>Document</title>
+  </head>
+  <body>
+    <h1 class="heading">Current Sensor Readings</h1>
+    <canvas id="myChart"></canvas>
+  </body>
+</html>
+<script>
+  window.onload = function () {
+    // Function to fetch data and update chart
+    function fetchDataAndUpdateChart() {
+      let params = new URLSearchParams(window.location.search);
+      let nodeId = params.get("nodeId");
+
+      if (nodeId) {
+        fetch(`/reading/fetch/plot?nodeId=${nodeId}&size=200`)
+          .then((response) => response.json())
+          .then((data) => {
+            let ctx = document.getElementById("myChart").getContext("2d");
+
+            let tempData = data
+              .filter((d) => d.temperature != null)
+              .map((d) => ({
+                x: new Date(d.createdAt),
+                y: d.temperature,
+              }));
+            let humidityData = data
+              .filter((d) => d.humidity != null)
+              .map((d) => ({
+                x: new Date(d.createdAt),
+                y: d.humidity,
+              }));
+            let lightIntensityData = data
+              .filter((d) => d.lightIntensity != null)
+              .map((d) => ({
+                x: new Date(d.createdAt),
+                y: d.lightIntensity,
+              }));
+
+            console.log(tempData);
+            console.log(humidityData);
+            console.log(lightIntensityData);
+
+            // Update the chart data
+            myChart.data.datasets[0].data = tempData;
+            myChart.data.datasets[1].data = humidityData;
+            myChart.data.datasets[2].data = lightIntensityData;
+            myChart.update();
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      } else {
+        console.error("No nodeId in query string");
+      }
+    }
+
+    // Initial fetch and update
+    fetchDataAndUpdateChart();
+
+    // Set interval to fetch and update data every 5 seconds
+    setInterval(fetchDataAndUpdateChart, 5000);
+
+    // Initialize chart object
+    let ctx = document.getElementById("myChart").getContext("2d");
+    let myChart = new Chart(ctx, {
+      type: "line",
+      data: {
+        datasets: [
+          {
+            label: "Temperature",
+            data: [],
+            borderColor: "rgba(255, 99, 132, 1)",
+            fill: false,
+          },
+          {
+            label: "Humidity",
+            data: [],
+            borderColor: "rgba(75, 192, 192, 1)",
+            fill: false,
+          },
+          {
+            label: "Light Intensity",
+            data: [],
+            borderColor: "rgba(153, 102, 255, 1)",
+            fill: false,
+          },
+        ],
+      },
+      options: {
+        responsive: true,
+        scales: {
+          x: {
+            type: "time",
+            time: {
+              unit: "minute",
+            },
+          },
+          y: {
+            beginAtZero: true,
+          },
+        },
+      },
+    });
+  };
+</script>
